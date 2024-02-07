@@ -1,5 +1,5 @@
 import flet as ft
-
+import flet_contrib.color_picker as ft_color_picker
 
 
 
@@ -94,6 +94,38 @@ def main(page: ft.Page):
             ]
     ))
 
+    def change_hue():
+        pass
+
+    fourth_row = ft.Container(
+        content=ft.Column(
+            controls=[
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    controls=[
+                        ft_color_picker.HueSlider(on_change_hue=change_hue),
+                    ]
+                ),
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    controls=[
+                        ft.Icon(name=ft.icons.BRIGHTNESS_LOW, color=ft.colors.WHITE),
+                        ft.Slider(expand=True),
+                        ft.Icon(name=ft.icons.BRIGHTNESS_HIGH, color=ft.colors.WHITE),
+                    ]
+                ),
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    controls=[
+                        ft.Icon(name=ft.icons.FAST_FORWARD_OUTLINED, color=ft.colors.WHITE),
+                        ft.Slider(expand=True),
+                        ft.Icon(name=ft.icons.FAST_FORWARD, color=ft.colors.WHITE),
+                    ]
+                ),
+            ]
+        )
+    )
+
     main_container = ft.Container(
         width = width,
         height = height,
@@ -105,7 +137,8 @@ def main(page: ft.Page):
             controls=[
                 first_row,
                 second_row,
-                third_row
+                third_row,
+                fourth_row,
             ]
         )
     )
