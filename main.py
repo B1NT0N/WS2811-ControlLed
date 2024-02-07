@@ -19,8 +19,13 @@ def main(page: ft.Page):
         content=ft.Row(
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             controls=[
-                ft.Container(
-                    ft.TextButton(text="Device ID"),
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.SPACE_EVENLY,
+                    controls=[   
+                        ft.Icon(name=ft.icons.CIRCLE, size=10, color=ft.colors.GREEN),
+                        ft.TextButton(text="Device ID"),
+                    ]
+                    
                 ),
                 
                 ft.Container(
@@ -48,7 +53,7 @@ def main(page: ft.Page):
         content=ft.Column(
             [
                 ft.Row(
-                    alignment=ft.MainAxisAlignment.SPACE_EVENLY,
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                     controls=[
                         create_color_units(ft.colors.RED, [255,0,0]),
                         create_color_units(ft.colors.GREEN, [0,255,0]),
@@ -59,7 +64,7 @@ def main(page: ft.Page):
                 ),
 
                 ft.Row(
-                    alignment=ft.MainAxisAlignment.SPACE_EVENLY,
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                     controls=[
                         create_color_units(ft.colors.RED, [255,0,0]),
                         create_color_units(ft.colors.GREEN, [0,255,0]),
@@ -126,12 +131,42 @@ def main(page: ft.Page):
         )
     )
 
+    last_row = ft.Container(
+        content=ft.Row(
+            controls=[
+                ft.Dropdown(
+                    expand=1,
+                    label="Order",
+                    value="RGB",
+                     options=[
+                        ft.dropdown.Option("RGB"),
+                    ],
+                ),
+                
+                ft.Dropdown(
+                    expand=1,
+                    label="IC Type",
+                    value="WS2811",
+                     options=[
+                        ft.dropdown.Option("WS2811"),
+                    ],
+                ),
+                ft.TextField(
+                    expand=1,
+                    value=300,
+                    label="Total Pixels"
+                ),
+            ]
+        )
+    )
+
     main_container = ft.Container(
         width = width,
         height = height,
         bgcolor = ft.colors.GREY_800,
         #border_radius = ft.border_radius.only(top_left=30, top_right=30, bottom_left=0, bottom_right=0),
-        margin=ft.margin.symmetric(vertical=10,),
+        margin=ft.margin.symmetric(vertical=10),
+        padding = ft.padding.all(10),
 
         content = ft.Column(
             controls=[
@@ -139,6 +174,7 @@ def main(page: ft.Page):
                 second_row,
                 third_row,
                 fourth_row,
+                last_row,
             ]
         )
     )
