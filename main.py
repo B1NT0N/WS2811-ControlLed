@@ -20,11 +20,11 @@ def main(page: ft.Page):
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             controls=[
                 ft.Container(
-                    ft.TextButton(text="Text button"),
+                    ft.TextButton(text="Device ID"),
                 ),
                 
                 ft.Container(
-                    ft.Switch(label="", value=False)
+                    ft.Switch(label=" ON/OFF", value=False, label_position=ft.LabelPosition.LEFT)
                 )
                 
             ]
@@ -35,8 +35,8 @@ def main(page: ft.Page):
 
         color_units = ft.Container(
         bgcolor = color,
-        width=width/8,
-        height=width/8,
+        width=width/6,
+        height=width/6,
         border_radius=ft.border_radius.all(5),
         on_click=lambda e: print(f"{color_rgb}"),
         )
@@ -74,6 +74,25 @@ def main(page: ft.Page):
 
     )
 
+    third_row = ft.Container(
+        content= ft.Row
+        (
+            alignment=ft.MainAxisAlignment.CENTER,
+            controls=[
+               ft.ElevatedButton(
+                expand = True,
+                height = width/6,
+                style=ft.ButtonStyle(
+                    bgcolor = ft.colors.WHITE,
+                    elevation = 0,
+                    surface_tint_color = ft.colors.WHITE,
+                    shape=ft.RoundedRectangleBorder(radius=5),
+                )
+                
+            ),
+
+            ]
+    ))
 
     main_container = ft.Container(
         width = width,
@@ -85,7 +104,8 @@ def main(page: ft.Page):
         content = ft.Column(
             controls=[
                 first_row,
-                second_row
+                second_row,
+                third_row
             ]
         )
     )
