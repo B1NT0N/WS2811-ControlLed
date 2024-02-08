@@ -16,6 +16,60 @@ def main(page: ft.Page):
 
     global color_units
 
+    dlg_column = ft.Ref[ft.Column]()
+    device_id_text = ft.Ref[ft.Text]()
+
+    
+    def close_dlg(e):
+
+        device_id_text.current.value = e.control.data
+        dlg_modal.open = False
+        page.update()
+
+    device1 = {
+        "ID":"test_id1",
+    }
+
+    device2 = {
+        "ID":"test_id2",
+    }
+
+    devices = [device1, device2,]
+
+    dlg_modal = ft.AlertDialog(
+        modal=True,
+        title=ft.Text("Chose Bluetooth Device"),
+        content=ft.Column(
+            ref=dlg_column,
+            height=35,
+            controls=[
+            ]
+        ),
+        actions=[
+            ft.TextButton("Cancel", on_click=close_dlg, data="Device ID"),
+        ],
+        actions_alignment=ft.MainAxisAlignment.END,
+        on_dismiss=lambda e: print("Modal dialog dismissed!"),
+    )
+
+    def open_dlg_modal(e):
+
+        dlg_column.current.controls.clear()
+
+        for device in devices:
+            dlg_column.current.controls.append(
+                ft.TextButton(f"{device['ID']}", on_click=close_dlg, data=f"{device['ID']}")
+            )
+        
+        dlg_column.current.height = 35*len(devices) + 5
+        
+        dlg_column.current.width = 2*len(devices)
+
+        page.dialog = dlg_modal
+        dlg_modal.open = True
+        page.update()
+
+
     first_row = ft.Container(
         margin=ft.margin.only(top=5, left=15,right=15,bottom=15),
         content=ft.Row(
@@ -26,10 +80,11 @@ def main(page: ft.Page):
                         content=ft.Row(
                             [
                                 ft.Icon(name="circle",size=15, color="green400"),
-                                ft.Text(value="Device ID", size=20, color="white",), 
+                                ft.Text(ref= device_id_text, value="Device ID", size=20, color="white",), 
                             ],
                         ),
                     ),
+                    on_click=open_dlg_modal
                 ),
                 
                 ft.Container(
