@@ -2,6 +2,7 @@ import flet as ft
 import flet_contrib.color_picker as ft_color_picker
 import asyncio
 from bleak import BleakScanner
+from sp110e.driver import Driver
 
 
 
@@ -20,13 +21,39 @@ def main(page: ft.Page):
 
     dlg_column = ft.Ref[ft.Column]()
     device_id_text = ft.Ref[ft.Text]()
+    status_indicator = ft.Ref[ft.Icon]()
+    order = ft.Ref[ft.Dropdown]()
+    ic_type = ft.Ref[ft.Dropdown]()
+    pixel_num = ft.Ref[ft.Text]()
+    mode = ft.Ref[ft.Text]()
 
-    
+    selected_device = Driver()
+
+    async def disconnect2device():
+        if selected_device.is_connected() != False:
+            await selected_device.disconnect()
+            print("disconected")
+        else:
+            print("Device already disconected")
+
+
+    async def connect2device(mac_address):
+
+        
+        await disconnect2device()
+        await selected_device.connect(f'{mac_address}')
+        selected_device.print_parameters()
+        
+        
     def close_dlg(e):
 
         device_id_text.current.value = e.control.data[0]
+        if e.control.data[1] != "":
+            asyncio.run(connect2device(e.control.data[1]))
+            status_indicator.current.color = ft.colors.GREEN_400
         dlg_modal.open = False
         page.update()
+
 
     def open_dlg_modal(e):
 
@@ -37,7 +64,10 @@ def main(page: ft.Page):
             dlg_modal.open = True
             page.update()
 
-            devices = asyncio.run(main())
+            try:
+                devices = asyncio.run(scan_devices())
+            except:
+                devices = []
 
             if devices != []:
 
@@ -56,7 +86,7 @@ def main(page: ft.Page):
             
             else:
                 dlg_column.current.controls.clear()
-                dlg_column.current.controls.append(ft.Text("NO DEVICES"))
+                dlg_column.current.controls.append(ft.Text("No Devices Found"))
                 page.dialog = dlg_modal
                 dlg_modal.open = True
                 page.update()
@@ -78,7 +108,7 @@ def main(page: ft.Page):
         #on_dismiss=lambda e: print("Modal dialog dismissed!"),
     )
 
-    async def main():
+    async def scan_devices():
 
         device_list = []
 
@@ -105,7 +135,7 @@ def main(page: ft.Page):
                     content=ft.Container(
                         content=ft.Row(
                             [
-                                ft.Icon(name="circle",size=15, color="red400"),
+                                ft.Icon(ref = status_indicator, name="circle",size=15, color="red400"),
                                 ft.Text(ref= device_id_text, value="Connect Device", size=20, color="white",), 
                             ],
                         ),
@@ -115,7 +145,7 @@ def main(page: ft.Page):
                 
                 ft.Container(
                     ft.Switch(
-                        label=" ON/OFF", 
+                    label=" ON/OFF", 
                     value=False, 
                     label_position=ft.LabelPosition.LEFT, 
                     active_track_color="green",
@@ -229,15 +259,17 @@ def main(page: ft.Page):
         content=ft.Row(
             controls=[
                 ft.Dropdown(
+                    ref = order,
                     expand=1,
                     label="Order",
-                    value="RGB",
+                    value="GBR",
                      options=[
-                        ft.dropdown.Option("RGB"),
+                        ft.dropdown.Option("GBR"),
                     ],
                 ),
                 
                 ft.Dropdown(
+                    ref = ic_type,
                     expand=1,
                     label="IC Type",
                     value="WS2811",
@@ -246,9 +278,16 @@ def main(page: ft.Page):
                     ],
                 ),
                 ft.TextField(
+                    ref = pixel_num,
                     expand=1,
-                    value=300,
+                    value=600,
                     label="Total Pixels"
+                ),
+                ft.TextField(
+                    ref = mode,
+                    expand=1,
+                    value=0,
+                    label="Mode"
                 ),
             ]
         )
