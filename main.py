@@ -3,7 +3,7 @@ import flet_contrib.color_picker as ft_color_picker
 import asyncio
 from bleak import BleakScanner
 from sp110e.driver import Driver
-
+import colorsys
 
 
 def main(page: ft.Page):
@@ -23,9 +23,11 @@ def main(page: ft.Page):
     device_id_text = ft.Ref[ft.Text]()
     status_indicator = ft.Ref[ft.Icon]()
     order = ft.Ref[ft.Dropdown]()
-    ic_type = ft.Ref[ft.Dropdown]()
+    ic_model = ft.Ref[ft.Dropdown]()
     pixel_num = ft.Ref[ft.Text]()
     mode = ft.Ref[ft.Text]()
+    bar_color = ft.Ref[ft.ElevatedButton]()
+    
 
     selected_device = Driver()
 
@@ -42,6 +44,15 @@ def main(page: ft.Page):
         
         await disconnect2device()
         await selected_device.connect(f'{mac_address}')
+        await device.write_parameters({
+        'ic_model': f'{ic_model}',
+        'sequence': f'{order}',
+        'pixels': int(pixel_num),
+        'speed': int(speed),
+        'brightness': int(brightness),
+        'mode': int(mode),
+        'color': color
+        })
         selected_device.print_parameters()
         
         
@@ -126,6 +137,25 @@ def main(page: ft.Page):
     
         return device_list
 
+    def hue_to_rgb(hue):
+        rgb_color = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+        return [int(item * 255) for item in rgb_color]
+
+    def rgb_to_hex(rgb):
+        return '#{:02x}{:02x}{:02x}'.format(rgb[0], rgb[1], rgb[2])
+
+    def change_hue():
+        color_rgb = hue_to_rgb(color_slider.hue)
+        color_hex = rgb_to_hex(color_rgb)
+        bar_color.current.bgcolor = color_hex
+        page.update()
+
+        
+    color_slider = ft_color_picker.HueSlider(
+                            #ref = color_slider,
+                            on_change_hue=change_hue
+                            )
+
     first_row = ft.Container(
         margin=ft.margin.only(top=5, left=15,right=15,bottom=15),
         content=ft.Row(
@@ -202,6 +232,7 @@ def main(page: ft.Page):
             alignment=ft.MainAxisAlignment.CENTER,
             controls=[
                ft.ElevatedButton(
+                ref = bar_color,
                 expand = True,
                 height = width/5,
                 style=ft.ButtonStyle(
@@ -216,9 +247,6 @@ def main(page: ft.Page):
             ]
     ))
 
-    def change_hue():
-        pass
-
     fourth_row = ft.Container(
         margin=ft.margin.all(15),
         padding=ft.padding.only(left=40, right=40),
@@ -229,7 +257,7 @@ def main(page: ft.Page):
                     alignment=ft.MainAxisAlignment.CENTER,
                     
                     controls=[
-                        ft_color_picker.HueSlider(on_change_hue=change_hue),
+                        color_slider
                     ],
                     
                 ),
@@ -269,9 +297,9 @@ def main(page: ft.Page):
                 ),
                 
                 ft.Dropdown(
-                    ref = ic_type,
+                    ref = ic_model,
                     expand=1,
-                    label="IC Type",
+                    label="IC Model",
                     value="WS2811",
                      options=[
                         ft.dropdown.Option("WS2811"),
