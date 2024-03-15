@@ -29,7 +29,7 @@ def main(page: ft.Page):
     bar_color = ft.Ref[ft.ElevatedButton]()
     
 
-    selected_device = Driver()
+    
 
     async def disconnect2device():
         if selected_device.is_connected() != False:
@@ -41,19 +41,25 @@ def main(page: ft.Page):
 
     async def connect2device(mac_address):
 
-        
-        await disconnect2device()
-        await selected_device.connect(f'{mac_address}')
-        await device.write_parameters({
-        'ic_model': f'{ic_model}',
-        'sequence': f'{order}',
-        'pixels': int(pixel_num),
-        'speed': int(speed),
-        'brightness': int(brightness),
-        'mode': int(mode),
-        'color': color
-        })
-        selected_device.print_parameters()
+        try:
+
+            await disconnect2device()
+            await selected_device.connect(f'{mac_address}')
+        except:
+            print("Conection erro")
+
+        if selected_device.is_connected():    
+            #await selected_device.write_parameter('ic_model', f'{ic_model.current.value}')
+            #await selected_device.write_parameter('sequence', f'{order.current.value}')
+            await selected_device.write_parameter('state', True)
+            
+            await selected_device.write_parameter('color', hex_to_rgb(bar_color.current.bgcolor))
+            await selected_device.write_parameter('brightness', 15)
+            #await selected_device.write_parameter('white', 0)
+            #await selected_device.write_parameters('mode', 0)
+            await selected_device.write_parameter('pixels', int(pixel_num.current.value))
+
+            selected_device.print_parameters()
         
         
     def close_dlg(e):
@@ -67,7 +73,7 @@ def main(page: ft.Page):
 
 
     def open_dlg_modal(e):
-
+            
             dlg_column.current.controls.clear()
 
             dlg_column.current.controls.append(ft.Row([ft.ProgressRing(width=16, height=16, stroke_width = 2), ft.Text("Scanning Devices")]),)
@@ -137,6 +143,15 @@ def main(page: ft.Page):
     
         return device_list
 
+    def hex_to_rgb(hex_color):
+        hex_color = hex_color.lstrip('#')
+        
+        r = int(hex_color[0:2], 16)
+        g = int(hex_color[2:4], 16)
+        b = int(hex_color[4:6], 16)
+        
+        return [r, g, b]
+
     def hue_to_rgb(hue):
         rgb_color = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
         return [int(item * 255) for item in rgb_color]
@@ -148,13 +163,15 @@ def main(page: ft.Page):
         color_rgb = hue_to_rgb(color_slider.hue)
         color_hex = rgb_to_hex(color_rgb)
         bar_color.current.bgcolor = color_hex
+        asyncio.create_task(change_parameter('color', color_rgb))
         page.update()
+          
 
-        
-    color_slider = ft_color_picker.HueSlider(
-                            #ref = color_slider,
-                            on_change_hue=change_hue
-                            )
+    async def change_parameter(parameter, value):
+        if selected_device.is_connected():
+            await selected_device.write_parameter(f'{parameter}', value)
+
+    color_slider = ft_color_picker.HueSlider(on_change_hue=change_hue)
 
     first_row = ft.Container(
         margin=ft.margin.only(top=5, left=15,right=15,bottom=15),
@@ -235,8 +252,8 @@ def main(page: ft.Page):
                 ref = bar_color,
                 expand = True,
                 height = width/5,
+                bgcolor = '#ffffff',
                 style=ft.ButtonStyle(
-                    bgcolor = ft.colors.WHITE,
                     elevation = 0,
                     surface_tint_color = ft.colors.WHITE,
                     shape=ft.RoundedRectangleBorder(radius=5),
@@ -290,9 +307,9 @@ def main(page: ft.Page):
                     ref = order,
                     expand=1,
                     label="Order",
-                    value="GBR",
+                    value="GRB",
                      options=[
-                        ft.dropdown.Option("GBR"),
+                        ft.dropdown.Option("GRB"),
                     ],
                 ),
                 
@@ -340,7 +357,7 @@ def main(page: ft.Page):
         )
     )
 
-
+    
     
     page.add(main_container)
 
