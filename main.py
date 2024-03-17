@@ -28,7 +28,7 @@ def main(page: ft.Page):
     mode = ft.Ref[ft.Text]()
     bar_color = ft.Ref[ft.ElevatedButton]()
     
-
+    selected_device = Driver()
     
 
     async def disconnect2device():
@@ -163,7 +163,7 @@ def main(page: ft.Page):
         color_rgb = hue_to_rgb(color_slider.hue)
         color_hex = rgb_to_hex(color_rgb)
         bar_color.current.bgcolor = color_hex
-        asyncio.create_task(change_parameter('color', color_rgb))
+        #asyncio.create_task(change_parameter('color', color_rgb))
         page.update()
           
 
